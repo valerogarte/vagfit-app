@@ -9,3 +9,7 @@ class APIConstants {
   static const String refreshEndpoint = '/token/refresh/';
   // Puedes añadir más endpoints o constantes aquí
 }
+
+class AppConstants {
+  static const String appName = 'VagFit';
+}
