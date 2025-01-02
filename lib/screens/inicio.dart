@@ -53,6 +53,7 @@ class _InicioPageState extends State<InicioPage> {
   Widget build(BuildContext context) {
     List<DateTime> weekDates = _getCurrentWeekDates();
     DateTime today = DateTime.now();
+    int daysTrainedCount = _diasEntrenados.where((date) => date.isAfter(today.subtract(Duration(days: 7)))).length;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -116,6 +117,13 @@ class _InicioPageState extends State<InicioPage> {
                     ),
                   );
                 }).toList(),
+              ),
+            ),
+            Text(
+              'Has entrenado $daysTrainedCount/7 días.',
+              style: TextStyle(
+                fontSize: 16,
+                color: AppColors.textColor,
               ),
             ),
             Expanded(
