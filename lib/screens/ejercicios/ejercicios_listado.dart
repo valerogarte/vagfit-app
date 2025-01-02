@@ -23,8 +23,7 @@ class EjerciciosListadoPage extends StatefulWidget {
   _EjerciciosListadoPageState createState() => _EjerciciosListadoPageState();
 }
 
-class _EjerciciosListadoPageState extends State<EjerciciosListadoPage>
-    with TickerProviderStateMixin {
+class _EjerciciosListadoPageState extends State<EjerciciosListadoPage> with TickerProviderStateMixin {
   late List<Map<String, dynamic>> _ejercicios;
   final ApiService _apiService = ApiService();
   dynamic entrenandoAhora;
@@ -36,16 +35,14 @@ class _EjerciciosListadoPageState extends State<EjerciciosListadoPage>
     _ejercicios = List<Map<String, dynamic>>.from(widget.sesion['ejercicios']);
 
     // Inicializa la lista de estados de expansión como una lista creciente
-    _isExpandedList =
-        List<bool>.filled(_ejercicios.length, false, growable: true);
+    _isExpandedList = List<bool>.filled(_ejercicios.length, false, growable: true);
 
     _checkEntrenandoStatus();
   }
 
   // Método para verificar el estado del entrenamiento
   Future<void> _checkEntrenandoStatus() async {
-    final sessionData =
-        await _apiService.fetchSesionCompleta(widget.sesion['id'].toString());
+    final sessionData = await _apiService.fetchSesionCompleta(widget.sesion['id'].toString());
     setState(() {
       entrenandoAhora = sessionData?['entrenando_ahora'] ?? false;
     });
@@ -66,29 +63,23 @@ class _EjerciciosListadoPageState extends State<EjerciciosListadoPage>
   }
 
   Future<void> _fetchSesionCompleta() async {
-    final sessionData =
-        await _apiService.fetchSesionCompleta(widget.sesion['id'].toString());
+    final sessionData = await _apiService.fetchSesionCompleta(widget.sesion['id'].toString());
     setState(() {
-      _ejercicios =
-          List<Map<String, dynamic>>.from(sessionData?['ejercicios'] ?? []);
+      _ejercicios = List<Map<String, dynamic>>.from(sessionData?['ejercicios'] ?? []);
       // Actualiza la lista de estados de expansión
-      _isExpandedList =
-          List<bool>.filled(_ejercicios.length, false, growable: true);
+      _isExpandedList = List<bool>.filled(_ejercicios.length, false, growable: true);
     });
   }
 
   // Método para eliminar un ejercicio
   Future<void> _eliminarEjercicio(String ejercicioSesionId) async {
-    final response =
-        await _apiService.delete('/ejercicios-sesion/$ejercicioSesionId/');
+    final response = await _apiService.delete('/ejercicios-sesion/$ejercicioSesionId/');
     if (response.statusCode == 204) {
       setState(() {
-        final index = _ejercicios.indexWhere(
-            (ejercicio) => ejercicio['id'].toString() == ejercicioSesionId);
+        final index = _ejercicios.indexWhere((ejercicio) => ejercicio['id'].toString() == ejercicioSesionId);
         if (index != -1) {
           _ejercicios.removeAt(index);
-          _isExpandedList.removeAt(
-              index); // Remueve el estado de expansión correspondiente
+          _isExpandedList.removeAt(index); // Remueve el estado de expansión correspondiente
         }
       });
     } else {
@@ -128,19 +119,15 @@ class _EjerciciosListadoPageState extends State<EjerciciosListadoPage>
     if (!success) {
       // Si hay un error, puedes mostrar un mensaje al usuario o manejarlo como consideres
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text('Error al actualizar el orden en el servidor.')),
+        const SnackBar(content: Text('Error al actualizar el orden en el servidor.')),
       );
     }
   }
 
   // Método para agregar una nueva serie a un ejercicio
-  Future<void> _agregarSerieAlEjercicioEnRutina(
-      String ejercicioSesionId) async {
+  Future<void> _agregarSerieAlEjercicioEnRutina(String ejercicioSesionId) async {
     // Encuentra el ejercicio correspondiente
-    final ejercicio = _ejercicios.firstWhere(
-        (e) => e['id'].toString() == ejercicioSesionId,
-        orElse: () => {});
+    final ejercicio = _ejercicios.firstWhere((e) => e['id'].toString() == ejercicioSesionId, orElse: () => {});
 
     // Verifica si hay series existentes y toma la última si es posible
     Map<String, dynamic> serieAnterior = {
@@ -151,10 +138,7 @@ class _EjerciciosListadoPageState extends State<EjerciciosListadoPage>
       'rer': 2,
     };
 
-    if (ejercicio != null &&
-        ejercicio is Map<String, dynamic> &&
-        ejercicio['series'] != null &&
-        ejercicio['series'].isNotEmpty) {
+    if (ejercicio != null && ejercicio is Map<String, dynamic> && ejercicio['series'] != null && ejercicio['series'].isNotEmpty) {
       final series = List<Map<String, dynamic>>.from(ejercicio['series']);
       serieAnterior = Map<String, dynamic>.from(series.last);
     }
@@ -216,9 +200,7 @@ class _EjerciciosListadoPageState extends State<EjerciciosListadoPage>
                 return Container(
                   key: ValueKey(ejercicioSesionId),
                   margin: EdgeInsets.only(
-                    top: index == 0
-                        ? 16.0
-                        : 6.0, // Margen superior solo para el primer ejercicio
+                    top: index == 0 ? 16.0 : 6.0, // Margen superior solo para el primer ejercicio
                     bottom: 4.0,
                     left: 12.0,
                     right: 12.0,
@@ -260,21 +242,18 @@ class _EjerciciosListadoPageState extends State<EjerciciosListadoPage>
                             child: InkWell(
                               onTap: () {
                                 setState(() {
-                                  _isExpandedList[index] =
-                                      !_isExpandedList[index];
+                                  _isExpandedList[index] = !_isExpandedList[index];
                                 });
                               },
                               child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 16, vertical: 8),
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                                 child: Row(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     // Información del ejercicio
                                     Expanded(
                                       child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
+                                        crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
                                           Text(
                                             ejercicio.nombre,
@@ -287,51 +266,38 @@ class _EjerciciosListadoPageState extends State<EjerciciosListadoPage>
                                           const SizedBox(height: 8),
                                           Text(
                                             'Series totales: ${sets.length}',
-                                            style: const TextStyle(
-                                                fontSize: 13,
-                                                color: AppColors.textColor),
+                                            style: const TextStyle(fontSize: 13, color: AppColors.textColor),
                                           ),
                                         ],
                                       ),
                                     ),
                                     // Botón de eliminar
                                     IconButton(
-                                      icon: const Icon(Icons.delete,
-                                          color: AppColors.background),
+                                      icon: const Icon(Icons.delete, color: AppColors.background),
                                       onPressed: () {
                                         // Confirmar antes de eliminar
                                         showDialog(
                                           context: context,
                                           builder: (context) {
                                             return AlertDialog(
-                                              backgroundColor:
-                                                  AppColors.cardBackground,
-                                              title: const Text(
-                                                  'Eliminar Ejercicio',
-                                                  style: TextStyle(
-                                                      color:
-                                                          AppColors.whiteText)),
+                                              backgroundColor: AppColors.cardBackground,
+                                              title: const Text('Eliminar Ejercicio', style: TextStyle(color: AppColors.whiteText)),
                                               content: const Text(
                                                 '¿Estás seguro de que deseas eliminar este ejercicio?',
-                                                style: TextStyle(
-                                                    color: AppColors.whiteText),
+                                                style: TextStyle(color: AppColors.whiteText),
                                               ),
                                               actions: [
                                                 TextButton(
-                                                  onPressed: () =>
-                                                      Navigator.pop(context),
+                                                  onPressed: () => Navigator.pop(context),
                                                   child: const Text(
                                                     'Cancelar',
-                                                    style: TextStyle(
-                                                        color: AppColors
-                                                            .deleteColor), // Usa deleteColor aquí
+                                                    style: TextStyle(color: AppColors.deleteColor), // Usa deleteColor aquí
                                                   ),
                                                 ),
                                                 ElevatedButton(
                                                   onPressed: () {
                                                     Navigator.pop(context);
-                                                    _eliminarEjercicio(
-                                                        ejercicioSesionId);
+                                                    _eliminarEjercicio(ejercicioSesionId);
                                                   },
                                                   child: const Text('Eliminar'),
                                                 ),
@@ -356,10 +322,7 @@ class _EjerciciosListadoPageState extends State<EjerciciosListadoPage>
                             ? Column(
                                 children: [
                                   Column(
-                                    children: sets
-                                        .asMap()
-                                        .entries
-                                        .map<Widget>((entry) {
+                                    children: sets.asMap().entries.map<Widget>((entry) {
                                       int setIndex = entry.key;
                                       var set = entry.value;
 
@@ -378,14 +341,9 @@ class _EjerciciosListadoPageState extends State<EjerciciosListadoPage>
                                   ),
                                   // Botón para agregar una nueva serie
                                   Padding(
-                                    padding: const EdgeInsets.only(
-                                        top: 25.0,
-                                        bottom:
-                                            15.0), // Margen específico para top y bottom
+                                    padding: const EdgeInsets.only(top: 25.0, bottom: 15.0), // Margen específico para top y bottom
                                     child: OutlinedButton.icon(
-                                      onPressed: () =>
-                                          _agregarSerieAlEjercicioEnRutina(
-                                              ejercicioSesionId),
+                                      onPressed: () => _agregarSerieAlEjercicioEnRutina(ejercicioSesionId),
                                       icon: const Icon(
                                         Icons.add,
                                         color: AppColors.textColor,
@@ -393,15 +351,11 @@ class _EjerciciosListadoPageState extends State<EjerciciosListadoPage>
                                       ),
                                       label: const Text(
                                         'Añadir Serie',
-                                        style: TextStyle(
-                                            color: AppColors.textColor),
+                                        style: TextStyle(color: AppColors.textColor),
                                       ),
                                       style: OutlinedButton.styleFrom(
-                                        side: const BorderSide(
-                                            color: AppColors.textColor,
-                                            width: 1.0), // Borde grisáceo
-                                        backgroundColor: Colors
-                                            .transparent, // Fondo transparente
+                                        side: const BorderSide(color: AppColors.textColor, width: 1.0), // Borde grisáceo
+                                        backgroundColor: Colors.transparent, // Fondo transparente
                                       ),
                                     ),
                                   ),
@@ -422,8 +376,7 @@ class _EjerciciosListadoPageState extends State<EjerciciosListadoPage>
               onPressed: () async {
                 if (entrenandoAhora is int) {
                   // Si hay un entrenamiento activo, obtener los datos de ese entrenamiento
-                  final entrenamientoData = await _apiService
-                      .fetchEntrenamiento(entrenandoAhora.toString());
+                  final entrenamientoData = await _apiService.fetchEntrenamiento(entrenandoAhora.toString());
 
                   if (entrenamientoData != null) {
                     await Navigator.push(
@@ -436,21 +389,17 @@ class _EjerciciosListadoPageState extends State<EjerciciosListadoPage>
                     );
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                          content: Text(
-                              'No se pudo cargar el entrenamiento actual.')),
+                      const SnackBar(content: Text('No se pudo cargar el entrenamiento actual.')),
                     );
                   }
                 } else {
                   // Si no hay entrenamiento activo, comenzar uno nuevo
-                  final entrenamientoData = await _apiService
-                      .crearEntrenamiento(widget.sesion['id'].toString());
+                  final entrenamientoData = await _apiService.crearEntrenamiento(widget.sesion['id'].toString());
 
                   if (entrenamientoData != null) {
                     final newEntrenamientoId = entrenamientoData['id'];
                     setState(() {
-                      entrenandoAhora =
-                          newEntrenamientoId; // Asignar el id del nuevo entrenamiento activo
+                      entrenandoAhora = newEntrenamientoId; // Asignar el id del nuevo entrenamiento activo
                     });
                     await Navigator.push(
                       context,

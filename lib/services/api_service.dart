@@ -237,4 +237,12 @@ class ApiService extends ApiClient {
     final response = await super.patch(endpoint, data);
     return response;
   }
+
+  Future<Map<String, dynamic>?> fetchResumenSemana() async {
+    final response = await get('/entrenamientos/resumen-entrenamientos/');
+    if (response.statusCode == 200) {
+      return jsonDecode(utf8.decode(response.bodyBytes));
+    }
+    return null;
+  }
 }
