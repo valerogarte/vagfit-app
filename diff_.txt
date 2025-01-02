@@ -1,0 +1,416 @@
+diff --git a/lib/screens/entrenamiento/entrenadora.dart b/lib/screens/entrenamiento/entrenadora.dart
+index 59d9830..76dd4b9 100644
+--- a/lib/screens/entrenamiento/entrenadora.dart
++++ b/lib/screens/entrenamiento/entrenadora.dart
+@@ -35,7 +35,7 @@ class Entrenadora {
+   Future<void> leerInicioEntrenamiento(Map<String, dynamic> entrenamiento, int currentEjercicioIndex) async {
+     // Solo lo leo si existen ejercicios
+     if (entrenamiento['ejercicios'] != null && entrenamiento['ejercicios'].isNotEmpty) {
+-      while (_isPaused) {
++      while (_isPaused || _borrarSpeaker) {
+         await Future.delayed(Duration(milliseconds: 100));
+         if (_borrarSpeaker) return;
+       }
+@@ -45,6 +45,11 @@ class Entrenadora {
+       bool ejercicioSinEmpezar = await hasTodasSeriesNoRealizadas(series);
+       String ejercicioNombre = entrenamiento['ejercicios'][currentEjercicioIndex]["ejercicio"]["nombre"];
+ 
++      while (_isPaused || _borrarSpeaker) {
++        await Future.delayed(Duration(milliseconds: 100));
++        if (_borrarSpeaker) return;
++      }
++
+       // Solo leerlo si no se ha empezado el ejercicio o no es el primer ejercicio
+       if (currentEjercicioIndex > 0 || !ejercicioSinEmpezar) {
+         await _flutterTts!.speak('Seguimos en el ejercicio $ejercicioNombre.');
+@@ -53,14 +58,14 @@ class Entrenadora {
+           await Future.delayed(const Duration(seconds: 1));
+           await leerIntroduccionEntrenamiento(entrenamiento);
+           await _flutterTts!.speak("Empezaremos con $ejercicioNombre.");
+-          while (_isPaused) {
++          while (_isPaused || _borrarSpeaker) {
+             await Future.delayed(Duration(milliseconds: 100));
+             if (_borrarSpeaker) return;
+           }
+           await Future.delayed(const Duration(milliseconds: 500));
+         }
+       }
+-      while (_isPaused) {
++      while (_isPaused || _borrarSpeaker) {
+         await Future.delayed(Duration(milliseconds: 100));
+         if (_borrarSpeaker) return;
+       }
+@@ -70,7 +75,7 @@ class Entrenadora {
+   // Método para contar las repeticiones
+   Future<void> contarRepeticiones(Map<String, dynamic> set, int currentIndex, int totalSeries) async {
+     if (_flutterTts != null) {
+-      while (_isPaused) {
++      while (_isPaused || _borrarSpeaker) {
+         await Future.delayed(Duration(milliseconds: 100));
+         if (_borrarSpeaker) return;
+       }
+@@ -78,31 +83,71 @@ class Entrenadora {
+       // Leer "3, 2, 1"
+       await leerCuentaAtras();
+ 
++      while (_isPaused || _borrarSpeaker) {
++        await Future.delayed(Duration(milliseconds: 100));
++        if (_borrarSpeaker) return;
++      }
++
+       // Leer mensaje "Empezamos"
+       await leerMensajeEmpezamos();
+ 
++      while (_isPaused || _borrarSpeaker) {
++        await Future.delayed(Duration(milliseconds: 100));
++        if (_borrarSpeaker) return;
++      }
++
+       // Contar las repeticiones
+       await contarRepeticionesEjercicio(set);
+ 
++      while (_isPaused || _borrarSpeaker) {
++        await Future.delayed(Duration(milliseconds: 100));
++        if (_borrarSpeaker) return;
++      }
++
+       // Leer "Serie completada"
+       await leerSerieCompletada();
++
++      while (_isPaused || _borrarSpeaker) {
++        await Future.delayed(Duration(milliseconds: 100));
++        if (_borrarSpeaker) return;
++      }
+     }
+   }
+ 
+   // Método para realizar el descanso y la cuenta atrás
+   Future<void> realizarDescanso(Map<String, dynamic> set, int currentIndex, int totalSeries, List<dynamic> ejercicios, int index) async {
+     if (_flutterTts != null) {
++      while (_isPaused || _borrarSpeaker) {
++        await Future.delayed(Duration(milliseconds: 100));
++        if (_borrarSpeaker) return;
++      }
++
+       // Hora actual en microsegundos
+       int horaActual = DateTime.now().microsecondsSinceEpoch;
+ 
+       await leerTiempoDescanso(set, currentIndex, totalSeries);
+ 
++      while (_isPaused || _borrarSpeaker) {
++        await Future.delayed(Duration(milliseconds: 100));
++        if (_borrarSpeaker) return;
++      }
++
+       await leerSiguienteSerieOrEjercicio(set, currentIndex, totalSeries, ejercicios, index);
+ 
++      while (_isPaused || _borrarSpeaker) {
++        await Future.delayed(Duration(milliseconds: 100));
++        if (_borrarSpeaker) return;
++      }
++
+       int horaFinal = DateTime.now().microsecondsSinceEpoch;
+       int tiempoLeer = (horaFinal - horaActual) ~/ 1000000;
+ 
+       await esperarDescanso(set, currentIndex, totalSeries, ejercicios, index, tiempoLeer);
++
++      while (_isPaused || _borrarSpeaker) {
++        await Future.delayed(Duration(milliseconds: 100));
++        if (_borrarSpeaker) return;
++      }
+     }
+   }
+ 
+diff --git a/lib/screens/entrenamiento/entrenadora_helpers.dart b/lib/screens/entrenamiento/entrenadora_helpers.dart
+index 1cd23ff..8441698 100644
+--- a/lib/screens/entrenamiento/entrenadora_helpers.dart
++++ b/lib/screens/entrenamiento/entrenadora_helpers.dart
+@@ -19,19 +19,19 @@ final List<String> inicioMessages = ['¡Empezamos!', '¡Manos a la obra!', '¡Va
+ extension EntrenadoraHelpers on Entrenadora {
+   // Metodo para leer la introducción del entrenamiento
+   Future<void> leerIntroduccionEntrenamiento(Map<String, dynamic> entrenamiento) async {
+-    while (_isPaused) {
++    while (_isPaused || _borrarSpeaker) {
+       await Future.delayed(Duration(milliseconds: 100));
+       if (_borrarSpeaker) return;
+     }
+     String entrenamientoNombre = entrenamiento['titulo'];
+     String diaSemana = DateFormat('EEEE', 'es_ES').format(DateTime.now());
+     await _flutterTts!.speak('Hoy $diaSemana vamos a realizar el entrenamiento $entrenamientoNombre.');
+-    while (_isPaused) {
++    while (_isPaused || _borrarSpeaker) {
+       await Future.delayed(Duration(milliseconds: 100));
+       if (_borrarSpeaker) return;
+     }
+     await Future.delayed(const Duration(milliseconds: 1500));
+-    while (_isPaused) {
++    while (_isPaused || _borrarSpeaker) {
+       await Future.delayed(Duration(milliseconds: 100));
+       if (_borrarSpeaker) return;
+     }
+@@ -40,7 +40,7 @@ extension EntrenadoraHelpers on Entrenadora {
+   // Método para leer la descripción de un ejercicio
+   Future<void> leerDescripcion(Map<String, dynamic> ejercicio) async {
+     if (_flutterTts != null) {
+-      while (_isPaused) {
++      while (_isPaused || _borrarSpeaker) {
+         await Future.delayed(Duration(milliseconds: 100));
+         if (_borrarSpeaker) return;
+       }
+@@ -53,7 +53,7 @@ extension EntrenadoraHelpers on Entrenadora {
+       if (haySerieNoRealizada) {
+         await leerSeriesRepesAndPeso(series);
+ 
+-        while (_isPaused) {
++        while (_isPaused || _borrarSpeaker) {
+           await Future.delayed(Duration(milliseconds: 100));
+           if (_borrarSpeaker) return;
+         }
+@@ -64,13 +64,13 @@ extension EntrenadoraHelpers on Entrenadora {
+   // Función para leer "3, 2, 1"
+   Future<void> leerCuentaAtras() async {
+     for (int i = 3; i > 0; i--) {
+-      while (_isPaused) {
++      while (_isPaused || _borrarSpeaker) {
+         await Future.delayed(Duration(milliseconds: 100));
+         if (_borrarSpeaker) return;
+       }
+       await _flutterTts!.speak('$i');
+       await Future.delayed(const Duration(milliseconds: 400));
+-      while (_isPaused) {
++      while (_isPaused || _borrarSpeaker) {
+         await Future.delayed(Duration(milliseconds: 100));
+         if (_borrarSpeaker) return;
+       }
+@@ -79,7 +79,7 @@ extension EntrenadoraHelpers on Entrenadora {
+ 
+   // Función para leer mensaje "Empezamos"
+   Future<void> leerMensajeEmpezamos() async {
+-    while (_isPaused) {
++    while (_isPaused || _borrarSpeaker) {
+       await Future.delayed(Duration(milliseconds: 100));
+       if (_borrarSpeaker) return;
+     }
+@@ -87,7 +87,7 @@ extension EntrenadoraHelpers on Entrenadora {
+     final messageEmpezamos = inicioMessages[randomEmpezamos.nextInt(inicioMessages.length)];
+     await _flutterTts!.speak(messageEmpezamos);
+     await Future.delayed(const Duration(milliseconds: 500));
+-    while (_isPaused) {
++    while (_isPaused || _borrarSpeaker) {
+       await Future.delayed(Duration(milliseconds: 100));
+       if (_borrarSpeaker) return;
+     }
+@@ -97,7 +97,7 @@ extension EntrenadoraHelpers on Entrenadora {
+   Future<void> contarRepeticionesEjercicio(Map<String, dynamic> set) async {
+     int repeticiones = set['repeticiones'];
+     for (int i = 1; i <= repeticiones; i++) {
+-      while (_isPaused) {
++      while (_isPaused || _borrarSpeaker) {
+         await Future.delayed(Duration(milliseconds: 100));
+         if (_borrarSpeaker) return;
+       }
+@@ -111,7 +111,7 @@ extension EntrenadoraHelpers on Entrenadora {
+         velocidadRepeticion = 0;
+       }
+       await Future.delayed(Duration(milliseconds: velocidadRepeticion));
+-      while (_isPaused) {
++      while (_isPaused || _borrarSpeaker) {
+         await Future.delayed(Duration(milliseconds: 100));
+         if (_borrarSpeaker) return;
+       }
+@@ -120,7 +120,7 @@ extension EntrenadoraHelpers on Entrenadora {
+ 
+   // Función para leer "Serie completada"
+   Future<void> leerSerieCompletada() async {
+-    while (_isPaused) {
++    while (_isPaused || _borrarSpeaker) {
+       await Future.delayed(Duration(milliseconds: 100));
+       if (_borrarSpeaker) return;
+     }
+@@ -128,7 +128,7 @@ extension EntrenadoraHelpers on Entrenadora {
+     final messageSerieCompletada = completionMessages[randomSerieCompletada.nextInt(completionMessages.length)];
+     await _flutterTts!.speak(messageSerieCompletada);
+     await Future.delayed(const Duration(milliseconds: 500));
+-    while (_isPaused) {
++    while (_isPaused || _borrarSpeaker) {
+       await Future.delayed(Duration(milliseconds: 100));
+       if (_borrarSpeaker) return;
+     }
+@@ -149,7 +149,7 @@ extension EntrenadoraHelpers on Entrenadora {
+   // Función para leer el tiempo de descanso
+   Future<void> leerTiempoDescanso(Map<String, dynamic> set, int currentIndex, int totalSeries) async {
+     if (_flutterTts != null) {
+-      while (_isPaused) {
++      while (_isPaused || _borrarSpeaker) {
+         await Future.delayed(Duration(milliseconds: 100));
+         if (_borrarSpeaker) return;
+       }
+@@ -166,7 +166,7 @@ extension EntrenadoraHelpers on Entrenadora {
+       } else {
+         await _flutterTts!.speak('Descansamos $descanso segundos');
+       }
+-      while (_isPaused) {
++      while (_isPaused || _borrarSpeaker) {
+         await Future.delayed(Duration(milliseconds: 100));
+         if (_borrarSpeaker) return;
+       }
+@@ -176,7 +176,7 @@ extension EntrenadoraHelpers on Entrenadora {
+   // Función para leer el siguiente ejercicio o serie
+   Future<void> leerSiguienteSerieOrEjercicio(Map<String, dynamic> set, int indexSet, int totalSeries, List<dynamic> ejercicios, int indexEjercicio) async {
+     if (_flutterTts != null) {
+-      while (_isPaused) {
++      while (_isPaused || _borrarSpeaker) {
+         await Future.delayed(Duration(milliseconds: 100));
+         if (_borrarSpeaker) return;
+       }
+@@ -195,9 +195,10 @@ extension EntrenadoraHelpers on Entrenadora {
+           mensajeSeriesRestantes = 'Vamos con la última serie.';
+         } else {
+           await _flutterTts!.speak('Vamos con la serie ${indexSet + 2}.');
+-          mensajeSeriesRestantes = 'Te quedan $seriesRestantes series.';
++          seriesRestantes = seriesRestantes - 1;
++          mensajeSeriesRestantes = 'Te queda esta serie y $seriesRestantes más.';
+         }
+-        while (_isPaused) {
++        while (_isPaused || _borrarSpeaker) {
+           await Future.delayed(Duration(milliseconds: 100));
+           if (_borrarSpeaker) return;
+         }
+@@ -205,7 +206,7 @@ extension EntrenadoraHelpers on Entrenadora {
+       } else {
+         await _flutterTts!.speak('Última serie');
+       }
+-      while (_isPaused) {
++      while (_isPaused || _borrarSpeaker) {
+         await Future.delayed(Duration(milliseconds: 100));
+         if (_borrarSpeaker) return;
+       }
+@@ -221,19 +222,19 @@ extension EntrenadoraHelpers on Entrenadora {
+             await _flutterTts!.speak('Cambia el peso a $pesoLiteral kilos.');
+           }
+         }
+-        while (_isPaused) {
++        while (_isPaused || _borrarSpeaker) {
+           await Future.delayed(Duration(milliseconds: 100));
+           if (_borrarSpeaker) return;
+         }
+         // Repetir a cuántas series vas
+         await Future.delayed(Duration(milliseconds: 400));
+-        while (_isPaused) {
++        while (_isPaused || _borrarSpeaker) {
+           await Future.delayed(Duration(milliseconds: 100));
+           if (_borrarSpeaker) return;
+         }
+         await _flutterTts!.setSpeechRate(0.5);
+       }
+-      while (_isPaused) {
++      while (_isPaused || _borrarSpeaker) {
+         await Future.delayed(Duration(milliseconds: 100));
+         if (_borrarSpeaker) return;
+       }
+@@ -247,7 +248,7 @@ extension EntrenadoraHelpers on Entrenadora {
+     int tiempoTotalDescanso = descanso - (tiempoDecirCuentaAtras + tiempoLeer);
+ 
+     for (int i = 0; i < tiempoTotalDescanso; i++) {
+-      while (_isPaused) {
++      while (_isPaused || _borrarSpeaker) {
+         await Future.delayed(Duration(milliseconds: 100));
+         if (_borrarSpeaker) return;
+       }
+@@ -268,7 +269,7 @@ extension EntrenadoraHelpers on Entrenadora {
+       }
+     }
+ 
+-    while (_isPaused) {
++    while (_isPaused || _borrarSpeaker) {
+       await Future.delayed(Duration(milliseconds: 100));
+       if (_borrarSpeaker) return;
+     }
+@@ -314,14 +315,14 @@ extension EntrenadoraHelpers on Entrenadora {
+   Future<void> leerSeriesRepesAndPeso(List<dynamic> series) async {
+     // Generar 'mensajeSeries' internamente usando 'series'
+     String mensajeSeries = generarMensajeSeries(series);
+-    while (_isPaused) {
++    while (_isPaused || _borrarSpeaker) {
+       await Future.delayed(Duration(milliseconds: 100));
+       if (_borrarSpeaker) return;
+     }
+     await _flutterTts!.setSpeechRate(0.4);
+     await _flutterTts!.speak(mensajeSeries);
+     await _flutterTts!.setSpeechRate(0.5);
+-    while (_isPaused) {
++    while (_isPaused || _borrarSpeaker) {
+       await Future.delayed(Duration(milliseconds: 100));
+       if (_borrarSpeaker) return;
+     }
+diff --git a/lib/screens/entrenamiento/entrenamiento.dart b/lib/screens/entrenamiento/entrenamiento.dart
+index 65b5e48..5b2caf9 100644
+--- a/lib/screens/entrenamiento/entrenamiento.dart
++++ b/lib/screens/entrenamiento/entrenamiento.dart
+@@ -157,14 +157,21 @@ class _EntrenamientoState extends State<Entrenamiento> {
+ 
+         for (var set in ejercicio['series']) {
+           if (!set['realizada']) {
++            print("Serie no realizada desde _leerEntrenamiento" + set['id'].toString());
++            while (_isPaused || _borrarSpeaker) {
++              await Future.delayed(Duration(milliseconds: 100));
++              if (_borrarSpeaker) return;
++            }
++
+             // CONTAR REPETICIONES
+             await _entrenadora.contarRepeticiones(set, ejercicio['series'].indexOf(set), ejercicio['series'].length);
+ 
+-            while (_isPaused) {
++            while (_isPaused || _borrarSpeaker) {
+               await Future.delayed(Duration(milliseconds: 100));
+               if (_borrarSpeaker) return;
+             }
+ 
++            print("Serie realizada desde _leerEntrenamiento" + set['id'].toString());
+             // SIMULAR CLICK en "Set completo"
+             WidgetsBinding.instance.addPostFrameCallback((_) {
+               if (mounted) {
+@@ -173,11 +180,17 @@ class _EntrenamientoState extends State<Entrenamiento> {
+                 });
+               }
+             });
++
++            while (_isPaused || _borrarSpeaker) {
++              await Future.delayed(Duration(milliseconds: 100));
++              if (_borrarSpeaker) return;
++            }
++
+             final String expandedKey = '$index-${set['id']}-expanded';
+             _expandedStates[expandedKey] = false;
+             await _completeSet(set, index);
+ 
+-            while (_isPaused) {
++            while (_isPaused || _borrarSpeaker) {
+               await Future.delayed(Duration(milliseconds: 100));
+               if (_borrarSpeaker) return;
+             }
+@@ -190,7 +203,7 @@ class _EntrenamientoState extends State<Entrenamiento> {
+           }
+         }
+ 
+-        while (_isPaused) {
++        while (_isPaused || _borrarSpeaker) {
+           await Future.delayed(Duration(milliseconds: 100));
+           if (_borrarSpeaker) return;
+         }
+@@ -241,6 +254,7 @@ class _EntrenamientoState extends State<Entrenamiento> {
+       'descanso': set['descanso'],
+       'rer': set['rer'],
+     };
++    print("Serie realizada desde _completeSet" + set['id'].toString());
+     await apiService.serieSetRealizada(set['id'].toString(), data);
+   }
+ 
+@@ -493,6 +507,7 @@ class _EntrenamientoState extends State<Entrenamiento> {
+                   };
+ 
+                   // Llama a la API para marcar la serie como completada
++                  print("Serie realizada desde onComplete");
+                   bool success = await apiService.serieSetRealizada(set['id'].toString(), data);
+ 
+                   if (success) {
